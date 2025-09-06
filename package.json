@@ -1,0 +1,26 @@
+{
+  "name": "nft-air-hockey-game",
+  "version": "1.0.0",
+  "description": "NFT Air Hockey Unity WebGL Game",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required for static files'",
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "unity",
+    "webgl",
+    "game",
+    "nft",
+    "air-hockey"
+  ],
+  "author": "NFT Air Hockey Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
