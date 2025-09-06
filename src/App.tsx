@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 
 function App() {
   const { unityProvider } = useUnityContext({
-    loaderUrl: "/NFT-Air-Hockey/game/Webgl.loader.js",
-    dataUrl: "/NFT-Air-Hockey/game/Webgl.data",
-    frameworkUrl: "/NFT-Air-Hockey/game/Webgl.framework.js",
-    codeUrl: "/NFT-Air-Hockey/game/Webgl.wasm",
+    loaderUrl: "/NFT-Air-Hockey/build/Webgl.loader.js",
+    dataUrl: "/NFT-Air-Hockey/build/Webgl.data",
+    frameworkUrl: "/NFT-Air-Hockey/build/Webgl.framework.js",
+    codeUrl: "/NFT-Air-Hockey/build/Webgl.wasm",
   });
 
   const [windowDimensions, setWindowDimensions] = useState({
