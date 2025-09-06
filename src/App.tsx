@@ -1,10 +1,18 @@
 import React, { useEffect, useRef } from 'react'
 
+// Declare Unity WebGL types
+declare global {
+  interface Window {
+    createUnityInstance: (canvas: HTMLCanvasElement, config: any, onProgress?: (progress: number) => void) => Promise<any>
+  }
+}
+
 function App() {
   const gameContainerRef = useRef<HTMLDivElement>(null)
+  const unityInstanceRef = useRef<any>(null)
 
   useEffect(() => {
-    const loadUnityGame = () => {
+    const loadUnityGame = async () => {
       if (!gameContainerRef.current) return
 
       // Clear any existing content
@@ -30,28 +38,63 @@ function App() {
       gameContainer.appendChild(canvas)
       gameContainerRef.current.appendChild(gameContainer)
 
-      // Load Unity WebGL
-      const script = document.createElement('script')
-      script.src = '/NFT-Air-Hockey/game/Webgl.loader.js'
-      script.onload = () => {
-        // The Unity loader will automatically initialize the game
-        console.log('Unity WebGL loader loaded successfully')
-      }
-      script.onerror = () => {
-        console.error('Failed to load Unity WebGL loader')
+      try {
+        // Load Unity WebGL framework first
+        const frameworkScript = document.createElement('script')
+        frameworkScript.src = '/NFT-Air-Hockey/game/Webgl.framework.js'
+        
+        await new Promise((resolve, reject) => {
+          frameworkScript.onload = resolve
+          frameworkScript.onerror = reject
+          document.head.appendChild(frameworkScript)
+        })
+
+        // Load Unity WebGL loader
+        const loaderScript = document.createElement('script')
+        loaderScript.src = '/NFT-Air-Hockey/game/Webgl.loader.js'
+        
+        await new Promise((resolve, reject) => {
+          loaderScript.onload = resolve
+          loaderScript.onerror = reject
+          document.head.appendChild(loaderScript)
+        })
+
+        // Create Unity instance
+        if (window.createUnityInstance) {
+          unityInstanceRef.current = await window.createUnityInstance(canvas, {
+            dataUrl: '/NFT-Air-Hockey/game/Webgl.data',
+            frameworkUrl: '/NFT-Air-Hockey/game/Webgl.framework.js',
+            codeUrl: '/NFT-Air-Hockey/game/Webgl.wasm',
+            streamingAssetsUrl: 'StreamingAssets',
+            companyName: 'NFT Air Hockey',
+            productName: 'NFT Air Hockey',
+            productVersion: '1.0',
+          }, (progress: number) => {
+            console.log(`Loading progress: ${Math.round(progress * 100)}%`)
+          })
+          
+          console.log('Unity WebGL game loaded successfully!')
+        } else {
+          throw new Error('Unity WebGL not available')
+        }
+      } catch (error) {
+        console.error('Failed to load Unity WebGL game:', error)
         gameContainer.innerHTML = '<p style="color: white; text-align: center;">Failed to load game. Please refresh the page.</p>'
       }
-      document.head.appendChild(script)
     }
 
     loadUnityGame()
 
     // Cleanup function
     return () => {
-      const existingScript = document.querySelector('script[src="/NFT-Air-Hockey/game/Webgl.loader.js"]')
-      if (existingScript) {
-        existingScript.remove()
+      if (unityInstanceRef.current) {
+        unityInstanceRef.current.Quit()
+        unityInstanceRef.current = null
       }
+      
+      // Remove scripts
+      const scripts = document.querySelectorAll('script[src*="/NFT-Air-Hockey/game/"]')
+      scripts.forEach(script => script.remove())
     }
   }, [])
 
